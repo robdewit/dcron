@@ -330,7 +330,9 @@ main(int ac, char **av)
 				 * If we resynchronize while jobs are running, we'll clobber
 				 * the job pids, so we won't know what's already running.
 				 */
-				if (CheckJobs() > 0) {
+				int jobs = CheckJobs();
+				if (jobs > 0) {
+					printlogf(LOG_DEBUG, "WG Skip synchronize, %d jobs still running\n", jobs);
 					rescan = 1;
 				} else {
 					rescan = 60;
@@ -349,6 +351,8 @@ main(int ac, char **av)
 				t1 = t2;
 				printlogf(LOG_NOTICE,"time disparity of %d minutes detected\n", dt / 60);
 			} else if (dt > 0) {
+				if (dt > 60)
+					printlogf(LOG_WARNING,"missed a beat, waited %d seconds\n", dt);
 				TestJobs(t1, t2);
 				RunJobs();
 				sleep(5);
